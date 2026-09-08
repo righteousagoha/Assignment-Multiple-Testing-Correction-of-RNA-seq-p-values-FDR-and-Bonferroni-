@@ -1,0 +1,53 @@
+---
+title: "C.elegans Assignment_Righteous K Agoha"
+author: "Righteous Kwaku Agoha"
+date: "2026-09-06"
+output: html_document
+---
+
+
+## R Markdown
+load("C:/Users/r468a762/Desktop/PhD/.RData")
+> list.files()
+> pv <- read.csv("p-values.csv")
+> head(pv)
+
+> str(pv)
+
+> pv$q_fdr  <- p.adjust(pv$pvalue, method = "BH")          # Benjamini-Hochberg FDR
+> pv$p_bonf <- p.adjust(pv$pvalue, method = "bonferroni")  # Bonferroni
+> # Raw p-value histogram (shows the signal: spike near 0 above a uniform floor)
+> hist(pv$pvalue, breaks = 50, main = "Distribution of raw p-values",
++      xlab = "p-value", col = "grey80")
+> 
+> # Ranked p-values against the BH threshold line — this IS the FDR procedure visualized
+> alpha <- 0.05
+> m <- nrow(pv)
+> plot(sort(pv$pvalue), pch = 16, cex = 0.4,
++      xlab = "Rank", ylab = "p-value",
++      main = "BH procedure, q = 0.05")
+> abline(0, alpha/m, col = "red")   # genes below the red line are FDR-significant
+> sig_fdr  <- subset(pv, q_fdr  < 0.05)
+> sig_bonf <- subset(pv, p_bonf < 0.05)
+> nrow(sig_fdr); nrow(sig_bonf)
+
+> write.csv(sig_fdr,  "significant_FDR.csv",  row.names = FALSE)
+> write.csv(sig_bonf, "significant_Bonferroni.csv", row.names = FALSE)
+> # Zoom into the region where the line and curve actually cross
+> plot(sort(pv$pvalue)[1:6000], pch = 16, cex = 0.4,
++      xlab = "Rank", ylab = "p-value",
++      main = "BH procedure, q = 0.05 (first 6000 genes)")
+> abline(0, alpha/m, col = "red", lwd = 2)
+> abline(v = 3903, lty = 2, col = "blue")   # the crossover: last FDR-significant gene
+> max(sig_fdr$pvalue)
+
+> png("pvalue_histogram.png", width = 828, height = 399)
+> hist(pv$pvalue, breaks = 50,
++      main = "Distribution of raw p-values (26,882 genes)",
++      xlab = "p-value", col = "grey80")
+> abline(v = 9.94e-05, col = "red", lwd = 2)
+> dev.off()
+
+
+```
+
